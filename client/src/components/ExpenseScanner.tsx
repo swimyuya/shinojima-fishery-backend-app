@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import receiptImageUrl from "@assets/レシート_1758394013347.jpg";
 
 interface OCRResult {
   date: string;
@@ -129,20 +130,12 @@ export default function ExpenseScanner() {
   const handleTestImage = async () => {
     console.log("テストレシートで解析開始");
     
-    // テスト用のレシート画像（base64エンコード済み）- コンビニレシートのサンプル
-    const base64Data = `/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAyAEIDAREAAhEBAxEB/8QAGgAAAgMBAQAAAAAAAAAAAAAAAwQCBQYBB//EACkQAAICAQQBAwMFAQAAAAAAAAECAAMRBBIhMUEFE1FhByIyQnGBkcH/xAAWAQEBAQAAAAAAAAAAAAAAAAABAAL/xAAXEQEBAQEAAAAAAAAAAAAAAAAAAREB/9oADAMBAAIRAxEAPwCJqK8kCTFRBkEhCRCF5gVEIUmZBSIxBSYQmJMFaBhCYkwUmBBBVIBEJtABMLQI7YaBXnB1oCDiMBEYKiGJqFIxJhK9DGCswVoTIhJgiYkwVmZoEYxCrMgZHaKzqoGElRCFJgqJxgWOIQpM4aFZmAUmYlMFZnoIhElRkgpMLYV7N0zOdgk2pKxuY4lWdTIElQjq4ISTGQtqF6lBUqkFXPKsDypHt/sJVZz5SxanOGZHdWC5UcLlWznvwRNYrxfDEMWyxNTXWjIzq1+2ABaA2WweOOp38V4b8dZdqjpbmrVnYNdwCgM3G3bns9z4nlasqmWZGRmXILAjGOsn5z4lHfgfh9e++z+qPo0uPOyGV2/S+1cDafz8mN7LN4ZrLpqKdQltdy1LZWw3VXcrjjGGwewQB8TYvO+o0NGo1bau6wqStWKgOrLlSSWwc4AAAGeuc5k1qKYEVAMDBBGCIRJhLXMy3Ac43pEUMYJJksxJEIhCYyUxgJkokkwioJMFYk5WZBGcxgMGKjMSYKyM4aFbGaZSIRMgKyZxNQR9gfkypBB8nh/rF1+g1i2V2siWV2Ky7tmTgd++PSI4V3xWuoqbT6jU7LDVbbZpbXZkbgFsDnAzsJ5m/gPTfm9TX4XQXPX6GrW3abU6B7/u67JVlsVgzEgdp36gfQidQrvV/wBPfO6aq221tO+psNtlbnOxyenOCDkfBJMm4+M+kujqfUX6N9PZ6/8AbdKHZV3kbs7vdPJG3jzz7y/OsevGhCEUUCOh5GYGqyZOLN2TKswyKJOGkC0mYB0BXhgQa3iXUgfFnMYGIGJmZLGBiBTJQw0I8wKK1o/e9bPHBgSHWoJK4AAJLA+h6IA2xUF1FLqhZ1b4vJIJ7J7zn3xAreq6yxaUY9I2cklmXHIIx7fPxI1MWFMGK8BCBCCB1Xj7n5hDqCJgUJGCRBAIYoFCnJJGPIbOIJqQMyqTGBRggcKZKP/Z`;
-    
     try {
       setIsScanning(true);
       
-      // base64をBlobに変換（手動デコード）
-      const byteCharacters = atob(base64Data);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const testBlob = new Blob([byteArray], { type: 'image/jpeg' });
+      // 添付されたレシート画像を使用
+      const response = await fetch(receiptImageUrl);
+      const testBlob = await response.blob();
       
       const imageUrl = URL.createObjectURL(testBlob);
       setReceiptImage(imageUrl);
@@ -151,13 +144,13 @@ export default function ExpenseScanner() {
       const formData = new FormData();
       formData.append('image', testBlob, 'test-receipt.jpg');
       
-      const response = await fetch('/api/analyze-receipt', {
+      const ocrResponse = await fetch('/api/analyze-receipt', {
         method: 'POST',
         body: formData
       });
       
-      if (response.ok) {
-        const ocrResult = await response.json();
+      if (ocrResponse.ok) {
+        const ocrResult = await ocrResponse.json();
         const resultData = {
           date: ocrResult.date,
           amount: ocrResult.amount,
@@ -174,7 +167,7 @@ export default function ExpenseScanner() {
           description: "サンプルレシートでのOCR解析が完了しました。",
         });
       } else {
-        const error = await response.text();
+        const error = await ocrResponse.text();
         throw new Error(`テストOCR解析に失敗しました: ${error}`);
       }
     } catch (error) {

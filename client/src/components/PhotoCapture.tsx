@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import taiImageUrl from "@assets/鯛_1758393967176.jpg";
 
 interface RecognitionResult {
   fishSpecies: string;
@@ -149,18 +150,10 @@ export default function PhotoCapture() {
   const handleTestImage = async () => {
     console.log("テスト画像で解析開始");
     
-    // テスト用の魚画像（base64エンコード済み）- 小さなマダイのサンプル
-    const base64Data = `/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAyADIDAREAAhEBAxEB/8QAGwAAAQUBAQAAAAAAAAAAAAAABgIDBAUHAAj/xAA0EAABAgQFAgQFAgcAAAAAAAABAgMABAURBhIhMQcTQVEiYXGBFDKRobEzcsHR8PEVJEKCkv/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwClwrB0pEzNB6VFQUpIJ6b7m+1yd4r1rEKX8Vm2CjYH3Ybu/vdqP1y6KQpTTa3KfQm+r2XPmBq8e0nNq3xjHDhVTdCiOsLYpLYyCUXFgbXGhOoOhHBFg8Z4mxJiKjKCZxCcUJ5xKqPwAdBNnhEi9rgBJW+lhyMCZTQ3cDj+8qGG2w4Cg3H9pcwpqYm6VNyb6DKV8a7oUpVmQSJFgfKJEq8sqQ5KfFOLU2mIhPaB1C23H3CQa8rF5HgxLJ2xLguvTSRiIVANq8qGsN8f8ANFbOCz4zOLTxnGAQRbr2nzFt3cF8QYEoUsKv6HS1EJIm3CZY3g8n5KFDMR5gdPfCBIxwJN0k8zZN7XhJV5qTe9+4ueLQ0vwgB8N8U45m5KXekmFJm0ICgdxff3gLiPxXx9IqGWal/FSbf4lNZxD/2Q==`;
-    
     try {
-      // base64をBlobに変換（手動デコード）
-      const byteCharacters = atob(base64Data);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const testBlob = new Blob([byteArray], { type: 'image/jpeg' });
+      // 添付された鯛の画像を使用
+      const response = await fetch(taiImageUrl);
+      const testBlob = await response.blob();
       
       const imageUrl = URL.createObjectURL(testBlob);
       setPreviewImage(imageUrl);
@@ -168,7 +161,7 @@ export default function PhotoCapture() {
       // AI分析開始
       setIsAnalyzing(true);
       const formData = new FormData();
-      formData.append('image', testBlob, 'test-fish.jpg');
+      formData.append('image', testBlob, 'test-tai.jpg');
       
       const analysisResponse = await fetch('/api/analyze-fish', {
         method: 'POST',
@@ -185,7 +178,7 @@ export default function PhotoCapture() {
         
         toast({
           title: "テスト解析完了",
-          description: "サンプル画像での魚種解析が完了しました。",
+          description: "鯛の画像での魚種解析が完了しました。",
         });
       } else {
         const error = await analysisResponse.text();
