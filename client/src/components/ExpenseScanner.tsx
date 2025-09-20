@@ -372,22 +372,24 @@ export default function ExpenseScanner() {
                 <Button 
                   variant="outline" 
                   size="lg"
-                  className="h-14"
+                  className="flex-1 max-w-xs h-14"
                   data-testid="button-upload-receipt"
                   disabled={isScanning}
                   onClick={() => document.getElementById('receipt-upload')?.click()}
                 >
-                  <Upload className="w-5 h-5" />
+                  <Upload className="w-5 h-5 mr-2" />
+                  アップロード
                 </Button>
                 <Button 
                   variant="outline"
                   size="lg"
-                  className="h-14"
+                  className="flex-1 max-w-xs h-14"
                   data-testid="button-test-receipt"
                   disabled={isScanning}
                   onClick={handleTestImage}
                 >
-                  <TestTube className="w-5 h-5" />
+                  <TestTube className="w-5 h-5 mr-2" />
+                  テスト画像
                 </Button>
                 <input
                   id="receipt-upload"
